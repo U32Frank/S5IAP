@@ -1,0 +1,12 @@
+Function get-playerdata{
+
+param ($PlayerID,$APIkey)
+
+$fullURi = "https://api.torn.com/user/" + $PlayerID + "?selections=&key=" + $APIkey
+
+$Playerdata = Invoke-WebRequest -Method get -uri $fullUri
+$playerdata = ConvertFrom-Json $Playerdata
+
+return $Playerdata
+
+}
