@@ -1,0 +1,11 @@
+function get-factiondata {
+
+param ($FactionID,$APIkey)
+
+$fullURi = "https://api.torn.com/faction/" + $factionID + "?selections=&key=" + $APIkey
+
+$FactionData = Invoke-WebRequest -Method get -Uri $fullURi
+
+return $FactionData
+
+}
