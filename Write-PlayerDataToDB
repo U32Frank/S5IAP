@@ -1,17 +1,34 @@
 Function Write-PlayerDataToDB
 {
 
-Import-Module SQLserver
+param($table,$playerdata,$foe)
 
-params($table,$playerdata,$foe)
+Import-Module SqlServer
 
-$SqlParams = @{'server'='localhost';'Database'=S5IAP''}
+$SQLParams = @{
 
-$InsertParams = "INSERT INTO [SQLShackDemo].[dbo].[tbl_Playerdata](Name,Level,Age,Status,Foe) VALUES ('$playerdata.name','$playerdata.level','$playerdata.age','$playerdata.status',$foe)"
+  'Database' = 'S5IAP'
+
+  'ServerInstance' =  's51apdb01.database.windows.net'
+
+  'Username' = 'U32Frank'
+
+  'Password' = 'Sp0ng3b0b!'
+
+  'OutputSqlErrors' = $true
+
+  }
+
+  $Pname = $playerdata.name
+  $Plevel = $playerdata.level
+  $Page = $playerdata.age
+  $pstatus = $playerdata.status
+  
+
+$InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status) VALUES ('$pname','$Plevel','$Page','$pstatus')"
+
+Invoke-sqlcmd @SqlParams -Query $InsertParams
 
 $InsertParams
-
-
-Invoke-sqlcmd @SqlParams -Query $InsertResults
 
 }
