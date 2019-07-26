@@ -1,0 +1,19 @@
+Function get-factionPlayerList{
+
+param ($FactionID,$APIkey)
+
+$fullURi = "https://api.torn.com/faction/" + $FactionID + "?selections=&key=" + $APIkey
+$FactionData = Invoke-WebRequest -Method get -uri $fullUri
+$FactionData = ConvertFrom-Json $FactionData
+
+[string]$factiondatastr = $factiondatamebers 
+
+$factiondatastr = $factiondatastr.Replace('@{','')
+$factiondatastr = $factiondatastr.Replace('=','')
+$factiondatastr = $factiondatastr.Replace('}','')
+
+$MembersList = $factiondatastr.Split(';')
+
+return $MembersList
+
+}
