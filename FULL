@@ -12,14 +12,21 @@ param($playerdata)
   'OutputSqlErrors' = $true
   }
 
+  $YourData = Get-playerdata -APIkey $YourAPIkey
+
   $Pname = $playerdata.name
   $Plevel = $playerdata.level
   $Page = $playerdata.age
   $pstatus = $playerdata.status
   $pPlayerId = $playerdata.player_id
+  $pFactionID = $playerData.faction.faction_id
+  $pPFactionIDName = $playerData.faction.faction_name
+  $pAddedBy = $YourData.name
+
+ 
   
 
-$InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status,PlayerID) VALUES ('$pname','$Plevel','$Page','$pstatus', '$pPlayerId')"
+$InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status,PlayerID,FactionID,FactionName,addedby) VALUES ('$pname','$Plevel','$Page','$pstatus','$pPlayerId','$pFactionID','$pPFactionIDName','$pAddedBy')"
 Invoke-sqlcmd @SQLParams -Query $InsertParams
 }
 
@@ -44,7 +51,7 @@ $fullURi = "https://api.torn.com/faction/" + $FactionID + "?selections=&key=" + 
 $FactionData = Invoke-WebRequest -Method get -uri $fullUri
 $FactionData = ConvertFrom-Json $FactionData
 
-[string]$factiondatastr = $factiondatamebers 
+[string]$factiondatastr = $factiondata.members 
 
 $factiondatastr = $factiondatastr.Replace('@{','')
 $factiondatastr = $factiondatastr.Replace('=','')
