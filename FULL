@@ -1,46 +1,4 @@
-
-clear 
 Import-Module SqlServer
-
-$YourAPIkey = '8QbjqsC2nh0L91yi'
-
-$YourData = get-playerdata -APIkey $YourAPIKey
-
-write-host "What would you like to do?"
-
-write-host "1. Get me a target"
-write-host "2. Add someone to the shit list"
-write-host "3. Add a faction to the shit list"
-write-host "4. Quit! No one like a quiter"
-
-do {
-
-$Selection = Read-Host -Prompt 'Selection?'
-
-If ($Selection -eq '1')
-{
-
-Get-target -YourAPIkey $YourAPIKey
-
-}
-
-If ($Selection -eq '2')
-{
-$PlayerID = Read-Host -Prompt 'Give me the player ID?'
-$playerData = Get-playerdata -PlayerID $PlayerID -APIkey $YourAPIKey
-Write-PlayerDataToDB -playerdata $playerData
-Write-Host "Done. TMB will make sure player pays for his sins"
-}
-
-If ($Selection -eq '3')
-{
-$FactionID = Read-Host -Prompt 'Give me the faction ID?'
-Get-WholeFaction -FactionID $FactionID -APIKey $YourAPIkey
-Write-Host "Done. War has never been so much fum!"
-}
-
-} while ($Selection -ne 4)
-
 
 Function Write-PlayerDataToDB{
 
@@ -142,8 +100,47 @@ $targetURL= "https://www.torn.com/profiles.php?XID="+$target.player_id+"#/"
 
 if ($target.status -eq 'Okay')
 {
-Return $targetURL
+start $targetURL
 }
 Else { write-host "the chump was thumped"}
 
 }
+
+clear 
+
+$YourAPIkey = '8QbjqsC2nh0L91yi'
+
+write-host "What would you like to do?"
+
+write-host "1. Get me a target"
+write-host "2. Add someone to the shit list"
+write-host "3. Add a faction to the shit list"
+write-host "4. Quit! No one like a quiter"
+
+do {
+
+$Selection = Read-Host -Prompt 'Selection?'
+
+If ($Selection -eq '1')
+{
+
+Get-target -YourAPIkey $YourAPIKey
+
+}
+
+If ($Selection -eq '2')
+{
+$PlayerID = Read-Host -Prompt 'Give me the player ID?'
+$playerData = Get-playerdata -PlayerID $PlayerID -APIkey $YourAPIKey
+Write-PlayerDataToDB -playerdata $playerData
+Write-Host "Done. TMB will make sure player pays for his sins"
+}
+
+If ($Selection -eq '3')
+{
+$FactionID = Read-Host -Prompt 'Give me the faction ID?'
+Get-WholeFaction -FactionID $FactionID -APIKey $YourAPIkey
+Write-Host "Done. War has never been so much fum!"
+}
+
+} while ($Selection -ne 4)
