@@ -1,0 +1,149 @@
+
+clear 
+Import-Module SqlServer
+
+$YourAPIkey = '8QbjqsC2nh0L91yi'
+
+$YourData = get-playerdata -APIkey $YourAPIKey
+
+write-host "What would you like to do?"
+
+write-host "1. Get me a target"
+write-host "2. Add someone to the shit list"
+write-host "3. Add a faction to the shit list"
+write-host "4. Quit! No one like a quiter"
+
+do {
+
+$Selection = Read-Host -Prompt 'Selection?'
+
+If ($Selection -eq '1')
+{
+
+Get-target -YourAPIkey $YourAPIKey
+
+}
+
+If ($Selection -eq '2')
+{
+$PlayerID = Read-Host -Prompt 'Give me the player ID?'
+$playerData = Get-playerdata -PlayerID $PlayerID -APIkey $YourAPIKey
+Write-PlayerDataToDB -playerdata $playerData
+Write-Host "Done. TMB will make sure player pays for his sins"
+}
+
+If ($Selection -eq '3')
+{
+$FactionID = Read-Host -Prompt 'Give me the faction ID?'
+Get-WholeFaction -FactionID $FactionID -APIKey $YourAPIkey
+Write-Host "Done. War has never been so much fum!"
+}
+
+} while ($Selection -ne 4)
+
+
+Function Write-PlayerDataToDB{
+
+param($playerdata)
+
+  $SQLParams = @{
+  'Database' = 'S5IAP'
+  'ServerInstance' =  's51apdb01.database.windows.net'
+  'Username' = 'U32Frank'
+  'Password' = 'Sp0ng3b0b!'
+  'OutputSqlErrors' = $true
+  }
+
+  $Pname = $playerdata.name
+  $Plevel = $playerdata.level
+  $Page = $playerdata.age
+  $pstatus = $playerdata.status
+  $pPlayerId = $playerdata.player_id
+  
+
+$InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status,PlayerID) VALUES ('$pname','$Plevel','$Page','$pstatus', '$pPlayerId')"
+Invoke-sqlcmd @SQLParams -Query $InsertParams
+}
+
+Function Get-playerdata{
+
+param ($PlayerID,$APIkey=$NULL)
+
+$fullURi = "https://api.torn.com/user/" + $PlayerID + "?selections=&key=" + $APIkey
+
+$Playerdata = Invoke-WebRequest -Method get -uri $fullUri
+$playerdata = ConvertFrom-Json $Playerdata
+
+return $Playerdata
+
+}
+
+Function Get-FactionPlayerList{
+
+param ($FactionID,$APIkey)
+
+$fullURi = "https://api.torn.com/faction/" + $FactionID + "?selections=&key=" + $APIkey
+$FactionData = Invoke-WebRequest -Method get -uri $fullUri
+$FactionData = ConvertFrom-Json $FactionData
+
+[string]$factiondatastr = $factiondatamebers 
+
+$factiondatastr = $factiondatastr.Replace('@{','')
+$factiondatastr = $factiondatastr.Replace('=','')
+$factiondatastr = $factiondatastr.Replace('}','')
+
+$MembersList = $factiondatastr.Split(';')
+
+return $MembersList
+
+}
+
+Function Get-WholeFaction{
+
+Param ($FactionID, $APIKey)
+
+$playerList = Get-FactionPlayerList -FactionID $FactionID -APIkey $APIKey
+
+foreach ($Player in $PlayerList)
+{
+
+$PlayerData =  Get-playerdata -PlayerID $player -APIkey $APIKey
+
+Write-PlayerDataToDB -playerdata $playerdata
+
+}
+
+}
+
+Function Get-Target{
+
+Param ($YourAPIkey)
+
+
+$YourData = Get-playerdata -APIkey $YourAPIkey
+
+  $SQLParams = @{
+  'Database' = 'S5IAP'
+  'ServerInstance' =  's51apdb01.database.windows.net'
+  'Username' = 'U32Frank'
+  'Password' = 'Sp0ng3b0b!'
+  'OutputSqlErrors' = $true
+  }
+  
+  [string]$age = $YourData.age
+
+$InsertParams = "SELECT * from Playerdata WHERE age < " + $age
+$Targets = Invoke-sqlcmd @SQLParams -Query $InsertParams
+$Targets = $Targets | where level -lt $YourData.level
+$PossTarget = get-random $Targets.PLayerID
+$target = get-playerdata -APIkey $YourAPIkey -PlayerID $PossTarget
+
+$targetURL= "https://www.torn.com/profiles.php?XID="+$target.player_id+"#/"
+
+if ($target.status -eq 'Okay')
+{
+Return $targetURL
+}
+Else { write-host "the chump was thumped"}
+
+}
