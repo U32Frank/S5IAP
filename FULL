@@ -23,11 +23,19 @@ param($playerdata)
   $pPFactionIDName = $playerData.faction.faction_name
   $pAddedBy = $YourData.name
 
- 
-  
+  $hatedstatus = Check-enemystatus -PlayerID $pPlayerId
 
-$InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status,PlayerID,FactionID,FactionName,addedby) VALUES ('$pname','$Plevel','$Page','$pstatus','$pPlayerId','$pFactionID','$pPFactionIDName','$pAddedBy')"
-Invoke-sqlcmd @SQLParams -Query $InsertParams
+  Write-host "This is rate limed to add 2 players a second due to the limits applied by torn"
+
+  If ($hatedstatus -ne 'HATED')
+
+  {
+
+  $InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status,PlayerID,FactionID,FactionName,addedby) VALUES ('$pname','$Plevel','$Page','$pstatus','$pPlayerId','$pFactionID','$pPFactionIDName','$pAddedBy')"
+  Start-Sleep 0.5
+  Invoke-sqlcmd @SQLParams -Query $InsertParams
+  }
+
 }
 
 Function Get-playerdata{
@@ -110,6 +118,45 @@ if ($target.status -eq 'Okay')
 start $targetURL
 }
 Else { write-host "the chump was thumped"}
+
+}
+
+Function Check-enemystatus{
+
+Param ($PlayerID)
+
+$SQLParams = @{
+  'Database' = 'S5IAP'
+  'ServerInstance' =  's51apdb01.database.windows.net'
+  'Username' = 'U32Frank'
+  'Password' = 'Sp0ng3b0b!'
+  'OutputSqlErrors' = $true
+  }
+
+  $YourData = Get-playerdata -APIkey $YourAPIkey
+
+  $Pname = $playerdata.name
+  $Plevel = $playerdata.level
+  $Page = $playerdata.age
+  $pstatus = $playerdata.status
+  $pPlayerId = $playerdata.player_id
+  $pFactionID = $playerData.faction.faction_id
+  $pPFactionIDName = $playerData.faction.faction_name
+  $pAddedBy = $YourData.name
+
+  $InsertParams = "select PlayerID from Playerdata where PlayerID = " + $pPlayerID
+  
+  $result = Invoke-sqlcmd @SQLParams -Query $InsertParams
+
+  if ($result -eq $NULL)
+  {
+  return $result
+
+  }Else {
+
+  $Result = "HATED"
+
+  return $result}
 
 }
 
