@@ -25,17 +25,15 @@ param($playerdata)
 
   $hatedstatus = Check-enemystatus -PlayerID $pPlayerId
 
-  Write-host "This is rate limed to add 2 players a second due to the limits applied by torn"
-
   If ($hatedstatus -ne 'HATED')
 
   {
 
   $InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status,PlayerID,FactionID,FactionName,addedby) VALUES ('$pname','$Plevel','$Page','$pstatus','$pPlayerId','$pFactionID','$pPFactionIDName','$pAddedBy')"
-  Start-Sleep 0.5
+  
   Invoke-sqlcmd @SQLParams -Query $InsertParams
   }
-
+ 
 }
 
 Function Get-playerdata{
@@ -85,6 +83,8 @@ $PlayerData =  Get-playerdata -PlayerID $player -APIkey $APIKey
 Write-PlayerDataToDB -playerdata $playerdata
 
 }
+ Write-host "You just did like a million API calls. Probably best we wait a bit for the API limit to reset"
+ Start-Sleep 60
 
 }
 
@@ -162,18 +162,11 @@ $SQLParams = @{
 
 clear 
 
-$YourAPIkey = '8QbjqsC2nh0L91yi'
-
-write-host "What would you like to do?"
-
-write-host "1. Get me a target"
-write-host "2. Add someone to the shit list"
-write-host "3. Add a faction to the shit list"
-write-host "4. Quit! No one like a quiter"
+$YourAPIkey = Read-Host -Prompt "I need your API key"
 
 do {
 
-$Selection = Read-Host -Prompt 'Selection?'
+$Selection = Read-Host -Prompt "What would you like to do?`n1. Get me a target `n2. Add someone to the shit list`n3. Add a faction to the shit list `n4. Quit! No one like a quiter"
 
 If ($Selection -eq '1')
 {
