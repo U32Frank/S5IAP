@@ -1,5 +1,27 @@
 Import-Module SqlServer
 
+Function get-APIkey{
+
+
+$DoesAPIexsist = test-path -Path C:\S5iaP\APIKey.txt
+
+if ($DoesAPIexsist -eq $true)
+
+{
+
+$YouAPIKey = Get-Content -Path C:\S5iaP\APIKey.txt -ReadCount 1
+
+}
+else {
+$YourAPIkey = Read-Host -Prompt "I need your API key"
+
+New-Item -Path 'C:\S5iaP\APIKey.txt' -ItemType File -Force | Out-Null
+
+Add-Content C:\S5iaP\APIKey.txt $YourAPIkey | Out-Null
+}
+
+}
+
 Function Write-PlayerDataToDB{
 
 param($playerdata)
@@ -162,7 +184,7 @@ $SQLParams = @{
 
 clear 
 
-$YourAPIkey = Read-Host -Prompt "I need your API key"
+get-APIkey
 
 do {
 
