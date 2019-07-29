@@ -9,16 +9,11 @@ if ($DoesAPIexsist -eq $true)
 {
 
 $YouAPIKey = Get-Content -Path C:\S5iaP\APIKey.txt -ReadCount 1
-
-
 }
 else {
 $YourAPIkey = Read-Host -Prompt "I need your API key"
-
 New-Item -Path 'C:\S5iaP\APIKey.txt' -ItemType File -Force | Out-Null
-
 Add-Content C:\S5iaP\APIKey.txt $YourAPIkey | Out-Null
-
 }
 
 }
@@ -63,7 +58,6 @@ param($playerdata)
   If ($hatedstatus -ne 'HATED')
 
   {
-
   $InsertParams = "INSERT INTO [S5IAP].[dbo].[Playerdata](Name,Level,Age,Status,PlayerID,FactionID,FactionName,addedby) VALUES ('$pname','$Plevel','$Page','$pstatus','$pPlayerId','$pFactionID','$pPFactionIDName','$pAddedBy')"
   Invoke-sqlcmd @SQLParams -Query $InsertParams
   }
@@ -84,7 +78,6 @@ $playerdata = ConvertFrom-Json $Playerdata
 return $Playerdata
 }
 }
-
 
 Function Get-FactionPlayerList{
 
