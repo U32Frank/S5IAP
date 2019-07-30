@@ -1,37 +1,26 @@
 ﻿Import-Module SqlServer
 
 Function get-APIkey{
-
-$DoesAPIexsist = test-path -Path C:\S5iaP\APIKey.txt
-
-if ($DoesAPIexsist -eq $true)
-
-{
-
-$YourAPIKey = Get-Content -Path C:\S5iaP\APIKey.txt -ReadCount 1
-
-
-}
-else {
+$DoesAPIexist = test-path -Path "C:\S5iaP\APIKey.txt"
+sleep 0.5
+if ($DoesAPIexist -eq $true) {
+$global:YourAPIKey = ( Get-Content -Path "C:\S5iaP\APIKey.txt" )
+} else {
 $YourAPIkey = Read-Host -Prompt "I need your API key"
-
 New-Item -Path 'C:\S5iaP\APIKey.txt' -ItemType File -Force | Out-Null
-
 Add-Content C:\S5iaP\APIKey.txt $YourAPIkey | Out-Null
-
 }
-
 }
 
 Function Get-UserData{
 
-param ($APIkey=$NULL)
+param ($YourAPIkey)
 
-$fullURi = "https://api.torn.com/user/?selections=&key=$YourAPIkey"
+$fullURi = "https://api.torn.com/user/" + $PlayerID + "?selections=&key=$script:YourAPIkey"
 $Playerdata = Invoke-WebRequest -Method get -uri $fullUri
-$playerdata = ConvertFrom-Json $Playerdata
+$global:playerdata = ConvertFrom-Json $Playerdata
 
-return $Playerdata
+return $global:Playerdata
 
 }
 
@@ -47,7 +36,7 @@ param($playerdata)
   'OutputSqlErrors' = $true
   }
 
-  $YourData = Get-UserData -APIkey $YourAPIkey
+  $script:YourData = Get-UserData -APIkey $YourAPIkey
 
   $Pname = $playerdata.name
   $Plevel = $playerdata.level
@@ -88,9 +77,9 @@ return $Playerdata
 
 Function Get-FactionPlayerList{
 
-param ($FactionID,$APIkey)
+param ($FactionID,$YourAPIkey)
 
-$fullURi = "https://api.torn.com/faction/" + $FactionID + "?selections=&key=" + $APIkey
+$fullURi = "https://api.torn.com/faction/" + $FactionID + "?selections=&key=" + $YourAPIkey
 write-host $fullURi4
 $FactionData = Invoke-WebRequest -Method get -uri $fullUri
 $FactionData = ConvertFrom-Json $FactionData
@@ -110,15 +99,15 @@ return $MembersList
 
 Function Get-WholeFaction{
 
-Param ($FactionID, $APIKey)
+Param ($FactionID, $YourAPIkey)
 
-$playerList = Get-FactionPlayerList -FactionID $FactionID -APIkey $APIKey
+$playerList = Get-FactionPlayerList -FactionID $FactionID -APIkey $YourAPIkey
 
 
 foreach ($Player in $PlayerList)
 {
 
-$PlayerData =  Get-playerdata -PlayerID $player -APIkey $APIKey
+$PlayerData =  Get-playerdata -PlayerID $player -APIkey $YourAPIkey
 Write-PlayerDataToDB -playerdata $playerdata
 
 sleep 0.6
@@ -132,8 +121,7 @@ Function Get-Target{
 Param ($YourAPIkey)
 
 
-$YourData = Get-Userdata -APIkey $YourAPIkey
-
+$global:YourData = Get-Userdata -APIkey $YourAPIkey
   $SQLParams = @{
   'Database' = 'S5IAP'
   'ServerInstance' =  's51apdb01.database.windows.net'
@@ -148,10 +136,9 @@ $YourData = Get-Userdata -APIkey $YourAPIkey
 $InsertParams = "SELECT * from Playerdata WHERE age < '$age'"
 $Targets = Invoke-sqlcmd @SQLParams -Query $InsertParams
 $Targets = $Targets | where level -lt $level
-$PossTarget = get-random $Targets.PlayerID
+$global:PossTarget = get-random $Targets.PlayerID
 
 $target = get-playerdata -APIkey $YourAPIkey -PlayerID $PossTarget
-
 $targetURL= "https://www.torn.com/profiles.php?XID="+$target.player_id+"#/"
 
 
@@ -160,9 +147,7 @@ if ($target.status -eq 'Okay')
 start $targetURL
 }
 Else { 
-$PossTarget = get-random $Targets.PlayerID
-$target = get-playerdata -APIkey $YourAPIkey -PlayerID $PossTarget
-$targetURL= "https://www.torn.com/profiles.php?XID="+$target.player_id+"#/"
+Get-Target
 }
 }
 
@@ -205,8 +190,7 @@ $SQLParams = @{
 
 }
 
-clear 
-
+clear
 get-APIkey
 
 do {
