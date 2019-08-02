@@ -6,27 +6,21 @@ sleep 0.5
 if ($DoesAPIexist -eq $true) {
 $global:YourAPIKey = ( Get-Content -Path "C:\S5iaP\APIKey.txt" )
 } else {
-$YourAPIkey = Read-Host -Prompt "I need your API key"
+$global:YourAPIkey = Read-Host -Prompt "I need your API key"
 New-Item -Path 'C:\S5iaP\APIKey.txt' -ItemType File -Force | Out-Null
-Add-Content C:\S5iaP\APIKey.txt $YourAPIkey | Out-Null
+Add-Content C:\S5iaP\APIKey.txt $global:YourAPIkey | Out-Null
 }
 }
 
 Function Get-UserData{
 
-param ($YourAPIkey)
-
-$fullURi = "https://api.torn.com/user/" + $PlayerID + "?selections=&key=$script:YourAPIkey"
+$fullURi = "https://api.torn.com/user/" + $PlayerID + "?selections=&key=" + $global:YourAPIkey
 $Playerdata = Invoke-WebRequest -Method get -uri $fullUri
 $global:playerdata = ConvertFrom-Json $Playerdata
-
-return $global:Playerdata
 
 }
 
 Function Write-PlayerDataToDB{
-
-param($playerdata)
 
   $SQLParams = @{
   'Database' = 'S5IAP'
@@ -36,7 +30,7 @@ param($playerdata)
   'OutputSqlErrors' = $true
   }
 
-  $script:YourData = Get-UserData -APIkey $YourAPIkey
+  $script:YourData = Get-UserData -APIkey $global:YourAPIkey
 
   $Pname = $playerdata.name
   $Plevel = $playerdata.level
